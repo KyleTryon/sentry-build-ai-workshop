@@ -270,37 +270,12 @@ Be friendly, concise, and educational. Present information in a clean, scannable
       // maxTokens: 4096,
     });
 
-    // Manual streaming approach for better reliability
-    const dataStream = result.toDataStreamResponse();
+    console.log('✅ streamText completed, starting response stream...');
     
-    // Set headers that work with useChat
-    res.writeHead(200, {
-      'Content-Type': 'text/plain; charset=utf-8',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive',
-      'Transfer-Encoding': 'chunked',
-    });
+    // Use the proper AI SDK streaming method for Express.js
+    result.pipeDataStreamToResponse(res);
     
-    // Stream the response manually with proper error handling
-    if (dataStream.body) {
-      const reader = dataStream.body.getReader();
-      const decoder = new TextDecoder();
-      
-      try {
-        let chunk;
-        while (!(chunk = await reader.read()).done) {
-          const text = decoder.decode(chunk.value, { stream: true });
-          res.write(text);
-        }
-      } catch (streamError) {
-        console.error('❌ Streaming error:', streamError);
-      } finally {
-        reader.releaseLock();
-        res.end();
-      }
-    } else {
-      res.end();
-    }
+    console.log('📤 Response streaming initiated');
     
   } catch (error) {
     console.error('Chat error:', error);
