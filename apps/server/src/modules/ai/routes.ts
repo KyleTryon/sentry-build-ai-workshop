@@ -259,7 +259,8 @@ IMPORTANT: You MUST use the createCourse tool to actually create the course. Do 
         createCourse: createCourseTool,
       },
       // maxTokens: 4000,
-      temperature: 1.0,
+      toolChoice: 'auto',
+      temperature: 1,
     });
 
     // Collect the result
