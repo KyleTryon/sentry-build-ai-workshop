@@ -1,4 +1,6 @@
+import * as Sentry from '@sentry/react';
 import React, { useState } from 'react';
+const { logger } = Sentry;
 import { useNavigate } from 'react-router-dom';
 import { GithubIcon, FileIcon as GoogleIcon, EyeIcon, EyeOffIcon } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
@@ -55,15 +57,48 @@ const LoginForm: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const userCredentials = fetchSSOUserCredentials(provider);
-      const loginSignature = createAuthenticationToken(userCredentials, provider);
-      
-      // FIXED Module 1: SSO Login now includes the login signature
-      await ssoLogin(provider, loginSignature);
-      
-      navigate('/');
+      await Sentry.startSpan(
+        {
+          name: 'sso.authentication.frontend',
+          op: 'auth.sso',
+          attributes: {
+            'auth.provider': provider,
+          },
+        },
+        async (span) => {
+          const userCredentials = fetchSSOUserCredentials(provider);
 
+          logger.info(
+            logger.fmt`Logging user ${userCredentials.email} in using ${provider}`
+          );
+
+          span.setAttributes({
+            'auth.user.id': userCredentials.id,
+            'auth.user.email': userCredentials.email,
+            'auth.user.name': userCredentials.name,
+            'auth.user.avatar': userCredentials.avatar,
+          });
+
+          const loginSignature = createAuthenticationToken(
+            userCredentials,
+            provider
+          );
+
+          span.setAttributes({
+            'auth.login_signature.defined':
+              loginSignature !== undefined && loginSignature !== null,
+          });
+
+          // FIXED Module 1: SSO Login now includes the login signature
+          await ssoLogin(provider, loginSignature);
+        }
+      );
+
+      navigate('/');
     } catch (err: any) {
+      logger.error(
+        logger.fmt`Failed to login with ${provider} - issue with loginSignature`
+      );
       setError(`Failed to login with ${provider} - issue with loginSignature`);
       throw err;
     } finally {

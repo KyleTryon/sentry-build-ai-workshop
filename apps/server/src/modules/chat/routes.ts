@@ -228,6 +228,10 @@ chatRoutes.post('/chat', async (req, res) => {
     
     const result = await streamText({
       model: openai(actualModel),
+      experimental_telemetry: {
+        isEnabled: true,
+        functionId: 'chatRequest',
+      },
       messages: [
         {
           role: 'system',
