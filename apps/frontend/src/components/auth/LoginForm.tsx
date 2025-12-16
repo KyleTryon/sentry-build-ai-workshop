@@ -55,7 +55,7 @@ const LoginForm: React.FC = () => {
   const handleSSO = async (provider: string) => {
     setError('');
     setIsLoading(true);
-  
+
     try {
       await Sentry.startSpan(
         {
@@ -67,32 +67,33 @@ const LoginForm: React.FC = () => {
         },
         async (span) => {
           const userCredentials = fetchSSOUserCredentials(provider);
-  
+
           logger.info(
             logger.fmt`Logging user ${userCredentials.email} in using ${provider}`
           );
-  
+
           span.setAttributes({
             'auth.user.id': userCredentials.id,
             'auth.user.email': userCredentials.email,
             'auth.user.name': userCredentials.name,
             'auth.user.avatar': userCredentials.avatar,
           });
-  
+
           const loginSignature = createAuthenticationToken(
             userCredentials,
             provider
           );
-  
+
           span.setAttributes({
             'auth.login_signature.defined':
               loginSignature !== undefined && loginSignature !== null,
           });
-  
-          await ssoLogin(provider);
+
+          // FIXED Module 1: SSO Login now includes the login signature
+          await ssoLogin(provider, loginSignature);
         }
       );
-  
+
       navigate('/');
     } catch (err: any) {
       logger.error(
