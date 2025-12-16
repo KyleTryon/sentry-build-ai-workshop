@@ -35,6 +35,7 @@ courseRoutes.get('/courses', async (req, res) => {
         slug: courses.slug,
         description: courses.description,
         instructorId: courses.instructorId,
+        instructor: users.name,
         thumbnail: courses.thumbnail,
         category: courses.category,
         tags: courses.tags,
@@ -49,18 +50,9 @@ courseRoutes.get('/courses', async (req, res) => {
         publishedAt: courses.publishedAt,
       })
       .from(courses)
+      .leftJoin(users, eq(courses.instructorId, users.id))
       .where(whereClause)
       .orderBy(desc(courses.createdAt));
-
-    for (const course of courseList as any) {
-      const instructor = await db
-        .select()
-        .from(users)
-        .where(eq(users.id, course.instructorId))
-        .limit(1);
-
-      course.instructor = instructor[0].name;
-    }
 
     console.log('Query completed, returning', courseList.length, 'courses');
     res.json(courseList);
