@@ -245,6 +245,10 @@ IMPORTANT: You MUST use the createCourse tool to actually create the course. Do 
 
     const result = await streamText({
       model: openai('gpt-4o-mini'),
+      experimental_telemetry: {
+        isEnabled: true,
+        functionId: 'generateCourse',
+      },
       messages: [
         {
           role: 'system',

@@ -5,4 +5,10 @@ Sentry.init({
   enableLogs: true,
   debug: true,
   tracesSampleRate: 1.0,
+  integrations: [
+    Sentry.vercelAIIntegration({
+      recordInputs: true,
+      recordOutputs: true,
+    }),
+  ],
 });
