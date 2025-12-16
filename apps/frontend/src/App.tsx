@@ -1,3 +1,7 @@
+
+import * as Sentry from '@sentry/react';
+import ErrorBoundary from './components/ErrorBoundary';
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
@@ -15,8 +19,12 @@ import AiCourseBuilderPage from './pages/AiCourseBuilderPage';
 import ProfilePage from './pages/ProfilePage';
 
 
+const SentryRoutes = Sentry.withSentryReactRouterV7Routing(Routes);
+
 // Protected route component
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
@@ -35,61 +43,100 @@ function App() {
     <AuthProvider>
       <UserStateProvider>
         <Router>
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
+          <SentryRoutes>
+            <Route
+              path="/login"
+              element={<LoginPage />}
+              errorElement={<ErrorBoundary />}
+            />
 
             <Route path="/" element={<MainLayout />}>
-              <Route index element={
-                <ProtectedRoute>
-                  <HomePage />
-                </ProtectedRoute>
-              } />
+              <Route
+                index
+                element={
+                  <ProtectedRoute>
+                    <HomePage />
+                  </ProtectedRoute>
+                }
+              />
 
-              <Route path="courses" element={
-                <ProtectedRoute>
-                  <CoursesPage />
-                </ProtectedRoute>
-              } />
+              <Route
+                path="courses"
+                element={
+                  <ProtectedRoute>
+                    <CoursesPage />
+                  </ProtectedRoute>
+                }
+                errorElement={<ErrorBoundary />}
+              />
 
-              <Route path="courses/:courseId" element={
-                <ProtectedRoute>
-                  <CourseDetailPage />
-                </ProtectedRoute>
-              } />
+              <Route
+                path="courses/:courseId"
+                element={
+                  <ProtectedRoute>
+                    <CourseDetailPage />
+                  </ProtectedRoute>
+                }
+                errorElement={<ErrorBoundary />}
+              />
 
-              <Route path="my-courses" element={
-                <ProtectedRoute>
-                  <MyCoursesPage />
-                </ProtectedRoute>
-              } />
+              <Route
+                path="my-courses"
+                element={
+                  <ProtectedRoute>
+                    <MyCoursesPage />
+                  </ProtectedRoute>
+                }
+                errorElement={<ErrorBoundary />}
+              />
 
-              <Route path="favorites" element={
-                <ProtectedRoute>
-                  <FavoritesPage />
-                </ProtectedRoute>
-              } />
+              <Route
+                path="ai-course-builder"
+                element={
+                  <ProtectedRoute>
+                    <AiCourseBuilderPage />
+                  </ProtectedRoute>
+                }
+                errorElement={<ErrorBoundary />}
+              />
 
-              <Route path="lesson-plans" element={
-                <ProtectedRoute>
-                  <LessonPlansPage />
-                </ProtectedRoute>
-              } />
+              <Route
+                path="favorites"
+                element={
+                  <ProtectedRoute>
+                    <FavoritesPage />
+                  </ProtectedRoute>
+                }
+                errorElement={<ErrorBoundary />}
+              />
 
-              <Route path="ai-course-builder" element={
-                <ProtectedRoute>
-                  <AiCourseBuilderPage />
-                </ProtectedRoute>
-              } />
+              <Route
+                path="lesson-plans"
+                element={
+                  <ProtectedRoute>
+                    <LessonPlansPage />
+                  </ProtectedRoute>
+                }
+                errorElement={<ErrorBoundary />}
+              />
 
-              <Route path="profile" element={
-                <ProtectedRoute>
-                  <ProfilePage />
-                </ProtectedRoute>
-              } />
+              <Route
+                path="profile"
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                }
+                errorElement={<ErrorBoundary />}
+              />
             </Route>
 
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+            <Route
+              path="*"
+              element={<Navigate to="/" replace />}
+              errorElement={<ErrorBoundary />}
+            />
+          </SentryRoutes>
         </Router>
       </UserStateProvider>
     </AuthProvider>

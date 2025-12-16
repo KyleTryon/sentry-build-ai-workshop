@@ -1,3 +1,5 @@
+import './instrument';
+import * as Sentry from '@sentry/node';
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
@@ -13,7 +15,7 @@ import { aiRoutes } from './src/modules/ai/routes';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-
+Sentry.setupExpressErrorHandler(app);
 // Middleware
 app.use(
   cors({
@@ -26,8 +28,8 @@ app.use(
     credentials: true,
   })
 );
-
 app.use(express.json());
+
 // Root route
 app.get('/', (req: express.Request, res: express.Response) => {
   res.json({ message: 'Sentry Academy API', version: '1.0.0' });
